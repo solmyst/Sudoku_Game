@@ -1,85 +1,95 @@
-# 🎯 Sudoku Game - React
+# 🤩 Sudoku Game
 
-Welcome to **Sudoku Game**, a modern and interactive Sudoku puzzle built using **React**. Whether you're a beginner or a puzzle pro, this game offers a clean interface, smooth experience, and dark/light mode for extra comfort!
+A sleek and interactive Sudoku game built using **React**! Play Sudoku, challenge your brain, and switch between light and dark themes for a modern UI experience.
 
+## ✨ Features
 
-## 🚀 Features
+- ✅ Classic 9x9 Sudoku board
+- 🌗 Light & Dark mode toggle
+- 🧠 Smart input validation
+- ♻️ Reset / New game functionality
+- 🎯 Simple and elegant design
+- ⚡ Fast and responsive UI using React
 
-- 🎮 Fully Interactive 9x9 Sudoku Board
-- 🌗 Light/Dark Theme Toggle
-- 💡 Number Input Pad
-- ⚠️ Error Highlighting & Validation
-- 📱 Responsive Design (Mobile Friendly)
-- ✨ Smooth Animations & Hover Effects
-- 🔁 Reset Puzzle / New Game
+## 💽 Demo
 
----
+Live demo: [Coming Soon / or Add your deployed link here]
 
-## 🛠️ Built With
+## 📸 Screenshots
+
+![Light Theme](./screenshots/light-theme.png)
+![Dark Theme](./screenshots/dark-theme.png)
+
+## 🔧 Tech Stack
 
 - [React](https://reactjs.org/)
-- [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS)
-- [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML)
-
----
+- [CSS Modules / Tailwind / Styled Components] (adjust this based on what you used)
+- [Vite / Create React App] (mention the bundler)
 
 ## 📦 Installation
 
+1. Clone the repo
+   ```bash
+   git clone https://github.com/your-username/sudoku-game.git
+   cd sudoku-game
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+
+3. Start the development server
+   ```bash
+   npm run dev
+   ```
+
+   or if you used Create React App:
+
+   ```bash
+   npm start
+   ```
+
+4. Open your browser at `http://localhost:3000` (or the port mentioned in your terminal)
+
+## 🛠️ How to Play
+
+- Click on any empty cell to input a number (1–9)
+- Use the keyboard or on-screen buttons (if available)
+- Avoid repeating numbers in rows, columns, and boxes
+- Use **Reset** to clear the board and start over
+
+## 💡 Future Improvements
+
+- Difficulty levels (Easy, Medium, Hard)
+- Hint system
+- Timer and score tracking
+- Mobile responsiveness improvements
+- Save game progress
+
+## 📂 Folder Structure (Optional)
+
 ```bash
-git clone https://github.com/<your-username>/sudoku-react.git
-cd sudoku-react
-npm install
-npm start
-Then open http://localhost:3000 in your browser.
-📁 Project Structure
-pgsql
-Copy
-Edit
-sudoku-react/
-├── public/
-├── src/
-│   ├── components/
-│   ├── styles/
-│   ├── App.jsx
-│   └── index.js
-├── package.json
-└── README.md
-🌈 Customization Ideas
-Add a timer
+src/
+├── components/
+│   ├── Board.jsx
+│   ├── Cell.jsx
+│   └── ThemeToggle.jsx
+├── styles/
+│   └── App.css
+├── App.jsx
+└── main.jsx
+```
 
-Implement difficulty levels
+## 🙌 Contributing
 
-Include a hint system
+Pull requests are welcome! Feel free to open issues or suggest features.
 
-Add leaderboard support
+## 📄 License
 
-Use local storage to save progress
+[MIT](./LICENSE)
 
-🧠 Learnings
-While building this project, I learned:
+---
 
-React fundamentals and hooks (useState, useEffect)
+Made with ❤️ by [Anush Gupta](https://github.com/somyst)
 
-State and input handling
-
-Conditional rendering and props
-
-Designing with CSS and responsive layout
-
-Creating clean and interactive UIs
-
-📸 Screenshots
-Replace these paths with your actual image files if you have them
-
-
-
-🙌 Contributing
-Want to contribute? Fork the repo and submit a PR!
-Found a bug or have a suggestion? Open an issue.
-
-📃 License
-Licensed under the MIT License.
-
-📬 Contact
-Made with ❤️ by Anush Gupta
-If you enjoyed this, don’t forget to ⭐️ the repo!
