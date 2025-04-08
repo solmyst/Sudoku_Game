@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">sudoku-sol</string>
+    <string name="title_activity_main">sudoku-sol</string>
+    <string name="package_name">com.anush.sudoku</string>
+    <string name="custom_url_scheme">com.anush.sudoku</string>
+</resources>

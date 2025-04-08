@@ -1,5 +1,68 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import './SudokuGame.css';
+// Create memoized Cell component to reduce re-renders
+const Cell = memo(({ cell, rowIndex, colIndex, selectedPosition, isInSameBox, onClick, domMatrix }) => {
+  const isSameNumber = selectedPosition.row !== null &&
+      cell.value !== 0 &&
+      domMatrix[selectedPosition.row][selectedPosition.col].value === cell.value;
+
+  return (
+      <div
+          className={`sdk-col ${colIndex === 2 || colIndex === 5 ? 'sdk-border-right' : ''} ${
+              selectedPosition.row === rowIndex && selectedPosition.col === colIndex ? 'sdk-selected' : ''
+          } ${
+              selectedPosition.row === rowIndex ? 'sdk-same-row' : ''
+          } ${
+              selectedPosition.col === colIndex ? 'sdk-same-col' : ''
+          } ${
+              isInSameBox(rowIndex, colIndex) ? 'sdk-same-box' : ''
+          } ${
+              isSameNumber ? 'sdk-same-number' : ''
+          }`}
+          onClick={() => onClick(rowIndex, colIndex)}
+      >
+        {cell.value !== 0 ? (
+            <div className={`sdk-solution ${
+                cell.isInitial ? 'sdk-initial' :
+                    cell.isCorrect ? 'sdk-correct' :
+                        cell.isIncorrect ? 'sdk-incorrect' :
+                            cell.isHint ? 'sdk-hint' : ''
+            }`}>
+              {cell.value}
+            </div>
+        ) : cell.notes.some(note => note) ? (
+            <div className="sdk-notes">
+              {cell.notes.map((isActive, index) => (
+                  <span key={index} className="sdk-note">
+              {isActive ? index + 1 : ''}
+            </span>
+              ))}
+            </div>
+        ) : null}
+      </div>
+  );
+});
+const NumberPad = memo(({ handleNumberInput, handleErase }) => {
+  return (
+      <div className="sdk-number-pad">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+            <button
+                key={num}
+                className="sdk-num-btn"
+                onClick={() => handleNumberInput(num)}
+            >
+              {num}
+            </button>
+        ))}
+        <button
+            className="sdk-num-btn sdk-erase-btn"
+            onClick={handleErase}
+        >
+          ✖
+        </button>
+      </div>
+  );
+});
 
 const SudokuGame = () => {
   // Game state
@@ -17,70 +80,98 @@ const SudokuGame = () => {
   const [gameStatus, setGameStatus] = useState('difficulty'); // 'difficulty', 'playing', 'completed', 'gameover'
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [difficulty, setDifficulty] = useState(null);
+  const [isMistakeCounting, setIsMistakeCounting] = useState(true);
 
   // Game configuration
   const difficultyLevels = [
-    { level: "Easy", numbers: 40 },
-    { level: "Medium", numbers: 30 },
-    { level: "Hard", numbers: 20 }
+    { level: "Easy", numbers: 40, maxHints: 6, countMistakes: false },
+    { level: "Medium", numbers: 30, maxHints: 3, countMistakes: true },
+    { level: "Hard", numbers: 20, maxHints: 2, countMistakes: true }
   ];
 
   // Create initial sudoku matrix
   const createMatrix = useCallback(() => {
+    // Create an empty matrix first
     let newMatrix = Array(9).fill().map(() => Array(9).fill(0));
 
-    // Fill with initial pattern
-    for (let rowCounter = 0; rowCounter < 9; rowCounter++) {
-      for (let colCounter = 0; colCounter < 9; colCounter++) {
-        let number = colCounter + 1 + (rowCounter * 3) + Math.floor(rowCounter / 3) % 3;
-        if (number > 9) number = number % 9;
-        if (number === 0) number = 9;
-        newMatrix[rowCounter][colCounter] = number;
-      }
-    }
+    // Fill the matrix using a more efficient algorithm
+    // This generates a valid Sudoku solution
+    const fillMatrix = (matrix) => {
+      for (let i = 0; i < 81; i++) {
+        const row = Math.floor(i / 9);
+        const col = i % 9;
 
-    // Switching rows
-    for (let no = 0; no < 9; no += 3) {
-      for (let no2 = 0; no2 < 3; no2++) {
-        let row1 = Math.floor(Math.random() * 3) + no;
-        let row2 = Math.floor(Math.random() * 3) + no;
-        while (row2 === row1) {
-          row2 = Math.floor(Math.random() * 3) + no;
-        }
+        if (matrix[row][col] === 0) {
+          // Shuffle the numbers 1-9
+          const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => 0.5 - Math.random());
 
-        let tmpMatrix = [...newMatrix[row1]];
-        newMatrix[row1] = [...newMatrix[row2]];
-        newMatrix[row2] = tmpMatrix;
-      }
-    }
+          for (let num of nums) {
+            if (isValid(matrix, row, col, num)) {
+              matrix[row][col] = num;
 
-    // Switching columns
-    for (let no = 0; no < 9; no += 3) {
-      for (let no2 = 0; no2 < 3; no2++) {
-        let col1 = Math.floor(Math.random() * 3) + no;
-        let col2 = Math.floor(Math.random() * 3) + no;
-        while (col2 === col1) {
-          col2 = Math.floor(Math.random() * 3) + no;
-        }
+              // If we can fill the rest of the matrix, we're done
+              if (i === 80 || fillMatrix(matrix)) {
+                return true;
+              }
 
-        for (let no3 = 0; no3 < 9; no3++) {
-          let tmpValue = newMatrix[no3][col1];
-          newMatrix[no3][col1] = newMatrix[no3][col2];
-          newMatrix[no3][col2] = tmpValue;
+              // If we can't fill the rest, backtrack
+              matrix[row][col] = 0;
+            }
+          }
+
+          return false;
         }
       }
-    }
+
+      return true;
+    };
+
+    // Check if a number is valid in a given position
+    const isValid = (matrix, row, col, num) => {
+      // Check row
+      for (let c = 0; c < 9; c++) {
+        if (matrix[row][c] === num) return false;
+      }
+
+      // Check column
+      for (let r = 0; r < 9; r++) {
+        if (matrix[r][col] === num) return false;
+      }
+
+      // Check 3x3 box
+      const boxRow = Math.floor(row / 3) * 3;
+      const boxCol = Math.floor(col / 3) * 3;
+
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          if (matrix[boxRow + r][boxCol + c] === num) return false;
+        }
+      }
+
+      return true;
+    };
+
+    fillMatrix(newMatrix);
 
     // Create a deep copy of the solution
     const newSolution = newMatrix.map(row => [...row]);
     setSolution(newSolution);
 
     // Set up the DOM matrix with empty/filled cells based on difficulty
-    let newDomMatrix = Array(9).fill().map(() => Array(9).fill({ value: 0, isInitial: false, isCorrect: false, isIncorrect: false, isHint: false, notes: Array(9).fill(false) }));
+    let newDomMatrix = Array(9).fill().map(() =>
+        Array(9).fill().map(() => ({
+          value: 0,
+          isInitial: false,
+          isCorrect: false,
+          isIncorrect: false,
+          isHint: false,
+          notes: Array(9).fill(false)
+        }))
+    );
 
     // Keep track of filled cells
     let filledCells = [];
-    let items = difficulty;
+    let items = difficulty.numbers;  // Important fix from before
 
     while (items > 0) {
       const row = Math.floor(Math.random() * 9);
@@ -103,13 +194,12 @@ const SudokuGame = () => {
 
     setMatrix(newMatrix);
     setDomMatrix(newDomMatrix);
-
-    // Start the timer
+    setHintsRemaining(difficulty.maxHints);
+    setIsMistakeCounting(difficulty.countMistakes);
     setGameTime(0);
     setTimerActive(true);
     setGameStatus('playing');
   }, [difficulty]);
-
   // Set up timer effect
   useEffect(() => {
     let interval = null;
@@ -133,7 +223,7 @@ const SudokuGame = () => {
   };
 
   // Handle cell selection
-  const handleCellClick = (row, col) => {
+  const handleCellClick = useCallback((row, col) => {
     if (isPaused || gameStatus !== 'playing') return;
 
     // Only allow selection of empty cells or user-filled cells
@@ -141,10 +231,10 @@ const SudokuGame = () => {
       setSelectedCell({ row, col });
       setSelectedPosition({ row, col });
     }
-  };
+  }, [isPaused, gameStatus, domMatrix]);
 
   // Determine if a cell is in the same box as the selected cell
-  const isInSameBox = (row, col) => {
+  const isInSameBox = useCallback((row, col) => {
     if (selectedPosition.row === null) return false;
 
     const boxStartRow = Math.floor(selectedPosition.row / 3) * 3;
@@ -153,7 +243,7 @@ const SudokuGame = () => {
     const cellBoxStartCol = Math.floor(col / 3) * 3;
 
     return boxStartRow === cellBoxStartRow && boxStartCol === cellBoxStartCol;
-  };
+  }, [selectedPosition]);
 
   // Handle number input
   const handleNumberInput = (num) => {
@@ -199,14 +289,14 @@ const SudokuGame = () => {
           notes: Array(9).fill(false)
         };
 
-        // Increment mistakes
-        const newMistakes = mistakes + 1;
-        setMistakes(newMistakes);
 
-        // Check for game over
-        if (newMistakes >= 3) {
-          setGameStatus('gameover');
-          setTimerActive(false);
+        if (isMistakeCounting) {
+          const newMistakes = mistakes + 1;
+          setMistakes(newMistakes);
+          if (newMistakes >= 3) {
+            setGameStatus('gameover');
+            setTimerActive(false);
+          }
         }
 
         // Reset incorrect flag after a delay
@@ -275,6 +365,7 @@ const SudokuGame = () => {
   // Give a hint to the player
   const giveHint = () => {
     if (hintsRemaining <= 0 || isPaused || gameStatus !== 'playing') return;
+    setHintsRemaining(difficulty.maxHints);
 
     // Find empty or incorrect cells
     const emptyCells = [];
@@ -338,18 +429,19 @@ const SudokuGame = () => {
   const restartGame = () => {
     setSelectedCell(null);
     setSelectedPosition({ row: null, col: null });
-    setHintsRemaining(3);
+    setHintsRemaining(difficulty.maxHints);  // Use the difficulty's hint count
     setMistakes(0);
     setGameTime(0);
     setIsPaused(false);
     setIsNoteMode(false);
-    setGameStatus('difficulty');
+    createMatrix();
   };
 
   // Start new game with selected difficulty
-  const startNewGame = (difficultyLevel) => {
-    setDifficulty(difficultyLevel);
+  const startNewGame = (difficultyObj) => {
+    setDifficulty(difficultyObj);
   };
+
 
   // Effect to create matrix when difficulty changes
   useEffect(() => {
@@ -358,6 +450,33 @@ const SudokuGame = () => {
     }
   }, [difficulty, createMatrix]);
 
+  const renderGameBoard = useMemo(() => {
+    if (gameStatus !== 'playing' || domMatrix.length === 0) return null;
+
+    return (
+        <div className="sdk-table">
+          {domMatrix.map((row, rowIndex) => (
+              <div
+                  key={rowIndex}
+                  className={`sdk-row ${rowIndex === 2 || rowIndex === 5 ? 'sdk-border-bottom' : ''}`}
+              >
+                {row.map((cell, colIndex) => (
+                    <Cell
+                        key={colIndex}
+                        cell={cell}
+                        rowIndex={rowIndex}
+                        colIndex={colIndex}
+                        selectedPosition={selectedPosition}
+                        isInSameBox={isInSameBox}
+                        onClick={handleCellClick}
+                        domMatrix={domMatrix}
+                    />
+                ))}
+              </div>
+          ))}
+        </div>
+    );
+  }, [domMatrix, selectedPosition, gameStatus, isInSameBox, handleCellClick]);
   // Render the notes in a cell
   const renderNotes = (notes) => {
     return (
@@ -370,24 +489,71 @@ const SudokuGame = () => {
         </div>
     );
   };
+  const getIconForDifficulty = (level) => {
+    switch(level) {
+      case 'Easy': return '🌱';
+      case 'Medium': return '🔥';
+      case 'Hard': return '⚡';
+      default: return '🎮';
+    }
+  };
 
+  const getDifficultyDescription = (level) => {
+    switch(level) {
+      case 'Easy': return 'Perfect for beginners or a quick game';
+      case 'Medium': return 'A balanced challenge for regular players';
+      case 'Hard': return 'Test your skills with complex puzzles';
+      default: return 'Select your challenge level';
+    }
+  };
+
+  const getAverageTime = (level) => {
+    switch(level) {
+      case 'Easy': return '5-10 min';
+      case 'Medium': return '10-20 min';
+      case 'Hard': return '20+ min';
+      default: return 'Varies';
+    }
+  };
   // Render game based on status
   const renderGame = () => {
     switch (gameStatus) {
       case 'difficulty':
         return (
-            <div className="sdk-picker">
-              <h2>Select Difficulty</h2>
-              <div className="sdk-difficulty-buttons">
-                {difficultyLevels.map((level, index) => (
-                    <button
-                        key={index}
-                        className="sdk-level-btn"
-                        onClick={() => startNewGame(level.numbers)}
-                    >
-                      {level.level}
-                    </button>
-                ))}
+            <div className="sdk-welcome-screen">
+              <div className="sdk-welcome-container">
+                <h2 className="sdk-welcome-title">Welcome to Sudoku</h2>
+                <p className="sdk-welcome-text">Challenge your mind with puzzles of varying difficulty</p>
+
+                <div className="sdk-difficulty-cards">
+                  {difficultyLevels.map((level, index) => (
+                      <div
+                          key={index}
+                          className="sdk-difficulty-card"
+                          onClick={() => startNewGame(level)}
+                      >
+                        <div className="sdk-card-badge">{level.level}</div>
+                        <div className="sdk-card-content">
+                          <div className="sdk-card-icon">{getIconForDifficulty(level.level)}</div>
+                          <h3>{level.level}</h3>
+                          <p>{getDifficultyDescription(level.level)}</p>
+                          <div className="sdk-card-stats">
+
+                            <div className="sdk-stat">
+                              <span className="sdk-stat-label">Hints</span>
+                              <span className="sdk-stat-value">{level.maxHints}</span>
+                            </div>
+                            <div className="sdk-stat">
+                              <span className="sdk-stat-label">Avg. Time</span>
+                              <span className="sdk-stat-value">{getAverageTime(level.level)}</span>
+                            </div>
+
+                          </div>
+                          <button className="sdk-play-btn">Play Now</button>
+                        </div>
+                      </div>
+                  ))}
+                </div>
               </div>
             </div>
         );
@@ -397,13 +563,18 @@ const SudokuGame = () => {
             <>
               <div className="sdk-header">
                 <div className="sdk-timer">{formatTime(gameTime)}</div>
-                <div className="sdk-mistakes">Mistakes: {mistakes}/3</div>
+                {isMistakeCounting && (
+                    <div className="sdk-mistakes">Mistakes: {mistakes}/3</div>
+                )}
                 <div className="sdk-controls">
                   <button className="sdk-hint-btn" onClick={giveHint} disabled={hintsRemaining <= 0}>
                     Hint ({hintsRemaining})
                   </button>
                   <button className="sdk-restart-btn" onClick={restartGame}>
                     Restart
+                  </button>
+                  <button className="sdk-difficulty-btn" onClick={() => setGameStatus('difficulty')}>
+                    Change
                   </button>
                   <button className="sdk-theme-btn" onClick={toggleTheme}>
                     {isDarkTheme ? '☀️' : '🌙'}
@@ -414,73 +585,19 @@ const SudokuGame = () => {
                 </div>
               </div>
 
-              <div className="sdk-table">
-                {domMatrix.map((row, rowIndex) => (
-                    <div
-                        key={rowIndex}
-                        className={`sdk-row ${rowIndex === 2 || rowIndex === 5 ? 'sdk-border-bottom' : ''}`}
-                    >
-                      {row.map((cell, colIndex) => (
-                          <div
-                              key={colIndex}
-                              className={`sdk-col ${colIndex === 2 || colIndex === 5 ? 'sdk-border-right' : ''} ${
-                                  selectedPosition.row === rowIndex && selectedPosition.col === colIndex ? 'sdk-selected' : ''
-                              } ${
-                                  selectedPosition.row === rowIndex ? 'sdk-same-row' : ''
-                              } ${
-                                  selectedPosition.col === colIndex ? 'sdk-same-col' : ''
-                              } ${
-                                  isInSameBox(rowIndex, colIndex) ? 'sdk-same-box' : ''
-                              } ${
-                                  selectedPosition.row !== null && cell.value !== 0 && domMatrix[selectedPosition.row][selectedPosition.col].value === cell.value ? 'sdk-same-number' : ''
-                              }`}
-                              onClick={() => handleCellClick(rowIndex, colIndex)}
-                          >
-                            {cell.value !== 0 ? (
-                                <div className={`sdk-solution ${
-                                    cell.isInitial ? 'sdk-initial' :
-                                        cell.isCorrect ? 'sdk-correct' :
-                                            cell.isIncorrect ? 'sdk-incorrect' :
-                                                cell.isHint ? 'sdk-hint' : ''
-                                }`}>
-                                  {cell.value}
-                                </div>
-                            ) : cell.notes.some(note => note) ? (
-                                renderNotes(cell.notes)
-                            ) : null}
-                          </div>
-                      ))}
-                    </div>
-                ))}
-              </div>
+              {renderGameBoard}
 
-              <div className="sdk-number-pad">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                    <button
-                        key={num}
-                        className="sdk-num-btn"
-                        onClick={() => handleNumberInput(num)}
-                    >
-                      {num}
-                    </button>
-                ))}
-                <button
-                    className="sdk-num-btn sdk-erase-btn"
-                    onClick={handleErase}
-                >
-                  ✖
-                </button>
-                <button
-                    className={`sdk-num-btn sdk-note-btn ${isNoteMode ? 'sdk-active' : ''}`}
-                    onClick={toggleNoteMode}
-                >
-                  📝
-                </button>
-              </div>
+              <NumberPad
+                  handleNumberInput={handleNumberInput}
+                  handleErase={handleErase}
+              />
 
               {isPaused && (
                   <div className="sdk-pause-overlay">
-                    <div>Game Paused</div>
+                    <div className="sdk-pause-content">
+                      <h2>Game Paused</h2>
+                      <button className="sdk-resume-btn" onClick={togglePause}>▶️ Resume Game</button>
+                    </div>
                   </div>
               )}
             </>
@@ -494,9 +611,14 @@ const SudokuGame = () => {
                 <p>
                   Congratulations! You completed the puzzle in {formatTime(gameTime)} with {mistakes} mistakes.
                 </p>
-                <button className="sdk-new-game-btn" onClick={restartGame}>
-                  New Game
-                </button>
+                <div className="sdk-completion-buttons">
+                  <button className="sdk-new-game-btn" onClick={restartGame}>
+                    New Game
+                  </button>
+                  <button className="sdk-difficulty-btn" onClick={() => setGameStatus('difficulty')}>
+                    Change Difficulty
+                  </button>
+                </div>
               </div>
             </div>
         );
@@ -507,9 +629,14 @@ const SudokuGame = () => {
               <div className="sdk-gameover-message">
                 <h2>Game Over</h2>
                 <p>You made too many mistakes!</p>
-                <button className="sdk-new-game-btn" onClick={restartGame}>
-                  New Game
-                </button>
+                <div className="sdk-gameover-buttons">
+                  <button className="sdk-new-game-btn" onClick={restartGame}>
+                    New Game
+                  </button>
+                  <button className="sdk-difficulty-btn" onClick={() => setGameStatus('difficulty')}>
+                    Change Difficulty
+                  </button>
+                </div>
               </div>
             </div>
         );
@@ -521,7 +648,7 @@ const SudokuGame = () => {
 
   return (
       <div className={`sudoku-container ${isDarkTheme ? 'sdk-dark-theme' : ''}`}>
-        <h1 className="sudoku-title">Modern Sudoku</h1>
+        {/*<h1 className="sudoku-title">Modern Sudoku</h1>*/}
         <div className="sdk-game">
           {renderGame()}
         </div>
