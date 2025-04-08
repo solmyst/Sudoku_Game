@@ -1,0 +1,666 @@
+/* Modern Sudoku Game CSS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Base styles */
+.sudoku-container {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    max-width: 550px;
+    margin: 0 auto;
+    transition: background-color 0.3s ease;
+}
+
+.sudoku-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    transition: color 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Game container */
+.sdk-game {
+    width: 100%;
+    position: relative;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+    background-color: #fff;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+/* Dark theme */
+.sdk-dark-theme .sudoku-title {
+    color: #e2e8f0;
+}
+
+.sdk-dark-theme {
+    background-color: #1a202c;
+    color: #e2e8f0;
+}
+
+.sdk-dark-theme .sdk-game {
+    background-color: #2d3748;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.sdk-dark-theme .sdk-col {
+    background-color: #3a4556;
+    border-color: #4a5568;
+}
+
+.sdk-dark-theme .sdk-border-bottom,
+.sdk-dark-theme .sdk-border-right {
+    border-color: #718096;
+}
+
+.sdk-dark-theme .sdk-selected {
+    background-color: #4c51bf !important;
+}
+
+.sdk-dark-theme .sdk-same-row,
+.sdk-dark-theme .sdk-same-col,
+.sdk-dark-theme .sdk-same-box {
+    background-color: #2c3d55;
+}
+
+.sdk-dark-theme .sdk-same-number {
+    background-color: #3c4b8c;
+}
+
+.sdk-dark-theme .sdk-num-btn,
+.sdk-dark-theme .sdk-hint-btn,
+.sdk-dark-theme .sdk-restart-btn,
+.sdk-dark-theme .sdk-theme-btn,
+.sdk-dark-theme .sdk-pause-btn,
+.sdk-dark-theme .sdk-level-btn,
+.sdk-dark-theme .sdk-new-game-btn {
+    background-color: #4a5568;
+    color: #e2e8f0;
+    border-color: #2d3748;
+}
+
+.sdk-dark-theme .sdk-num-btn:hover,
+.sdk-dark-theme .sdk-hint-btn:hover,
+.sdk-dark-theme .sdk-restart-btn:hover,
+.sdk-dark-theme .sdk-theme-btn:hover,
+.sdk-dark-theme .sdk-pause-btn:hover,
+.sdk-dark-theme .sdk-level-btn:hover,
+.sdk-dark-theme .sdk-new-game-btn:hover {
+    background-color: #5a6678;
+}
+
+/* Header */
+.sdk-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sdk-dark-theme .sdk-header {
+    border-color: #4a5568;
+}
+
+.sdk-timer {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-right: 1rem;
+    min-width: 80px;
+    color: #3182ce;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: color 0.3s ease;
+}
+
+.sdk-dark-theme .sdk-timer {
+    color: #63b3ed;
+}
+
+.sdk-mistakes {
+    font-size: 1rem;
+    color: #e53e3e;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: color 0.3s ease;
+}
+
+.sdk-dark-theme .sdk-mistakes {
+    color: #fc8181;
+}
+
+.sdk-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sdk-hint-btn,
+.sdk-restart-btn,
+.sdk-theme-btn,
+.sdk-pause-btn {
+    padding: 8px 12px;
+    background-color: #edf2f7;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sdk-hint-btn:hover,
+.sdk-restart-btn:hover,
+.sdk-theme-btn:hover,
+.sdk-pause-btn:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sdk-hint-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Sudoku table */
+.sdk-table {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 2px solid #2d3748;
+    transition: all 0.3s ease;
+}
+
+.sdk-dark-theme .sdk-table {
+    border-color: #4a5568;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.sdk-row {
+    display: flex;
+    width: 100%;
+}
+
+.sdk-border-bottom {
+    border-bottom: 3px solid #2d3748;
+}
+
+.sdk-dark-theme .sdk-border-bottom {
+    border-bottom-color: #718096;
+}
+
+.sdk-col {
+    position: relative;
+    width: 11.11%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border: 1px solid #cbd5e0;
+    background-color: #f7fafc;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.sdk-border-right {
+    border-right: 3px solid #2d3748;
+}
+
+.sdk-dark-theme .sdk-border-right {
+    border-right-color: #718096;
+}
+
+.sdk-col:hover {
+    background-color: #edf2f7;
+    transform: scale(1.02);
+    z-index: 1;
+}
+
+.sdk-dark-theme .sdk-col:hover {
+    background-color: #4a5568;
+}
+
+.sdk-selected {
+    background-color: #bee3f8 !important;
+    box-shadow: inset 0 0 0 2px #3182ce;
+    transform: scale(1.03);
+    z-index: 2;
+}
+
+.sdk-same-row,
+.sdk-same-col,
+.sdk-same-box {
+    background-color: #ebf8ff;
+}
+
+.sdk-same-number {
+    background-color: #c6f6d5;
+}
+
+.sdk-solution {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.sdk-initial {
+    color: #1a202c;
+    font-weight: 700;
+}
+
+.sdk-dark-theme .sdk-initial {
+    color: #f7fafc;
+}
+
+.sdk-correct {
+    color: #3182ce;
+    font-weight: 600;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.sdk-dark-theme .sdk-correct {
+    color: #63b3ed;
+}
+
+.sdk-incorrect {
+    color: #e53e3e;
+    font-weight: 600;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.sdk-dark-theme .sdk-incorrect {
+    color: #fc8181;
+}
+
+.sdk-hint {
+    color: #38a169;
+    font-weight: 600;
+    animation: pulse 1s infinite;
+}
+
+.sdk-dark-theme .sdk-hint {
+    color: #68d391;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Notes */
+.sdk-notes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    font-size: 0.6rem;
+    color: #718096;
+}
+
+.sdk-dark-theme .sdk-notes {
+    color: #a0aec0;
+}
+
+.sdk-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+
+/* Number pad */
+.sdk-number-pad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.sdk-num-btn {
+    padding: 16px 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    background-color: #edf2f7;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sdk-num-btn:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sdk-num-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+.sdk-erase-btn {
+    color: #e53e3e;
+}
+
+.sdk-dark-theme .sdk-erase-btn {
+    color: #fc8181;
+}
+
+.sdk-note-btn {
+    font-size: 1rem;
+}
+
+.sdk-note-btn.sdk-active {
+    background-color: #3182ce;
+    color: white;
+    box-shadow: 0 2px 6px rgba(49, 130, 206, 0.4);
+}
+
+.sdk-dark-theme .sdk-note-btn.sdk-active {
+    background-color: #4299e1;
+    box-shadow: 0 2px 6px rgba(66, 153, 225, 0.4);
+}
+
+/* Difficulty picker */
+.sdk-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 350px;
+    padding: 2rem;
+}
+
+.sdk-picker h2 {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    color: #2d3748;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.sdk-dark-theme .sdk-picker h2 {
+    color: #e2e8f0;
+}
+
+.sdk-difficulty-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 80%;
+    max-width: 300px;
+}
+
+.sdk-level-btn {
+    padding: 16px 24px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    background-color: #edf2f7;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #2d3748;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.sdk-level-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: all 0.6s ease;
+}
+
+.sdk-level-btn:hover:before {
+    left: 100%;
+}
+
+.sdk-level-btn:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sdk-level-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Completion overlay */
+.sdk-completion-overlay,
+.sdk-gameover-overlay,
+.sdk-pause-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+.sdk-pause-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.sdk-completion-message,
+.sdk-gameover-message {
+    background-color: white;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.5s ease-out;
+}
+
+.sdk-dark-theme .sdk-completion-message,
+.sdk-dark-theme .sdk-gameover-message {
+    background-color: #2d3748;
+    color: #e2e8f0;
+}
+
+.sdk-completion-message h2,
+.sdk-gameover-message h2 {
+    font-size: 1.75rem;
+    color: #38a169;
+    margin-bottom: 12px;
+}
+
+.sdk-dark-theme .sdk-completion-message h2 {
+    color: #68d391;
+}
+
+.sdk-gameover-message h2 {
+    color: #e53e3e;
+}
+
+.sdk-dark-theme .sdk-gameover-message h2 {
+    color: #fc8181;
+}
+
+.sdk-pause-overlay div {
+    font-size: 2rem;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.sdk-new-game-btn {
+    margin-top: 16px;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(49, 130, 206, 0.4);
+}
+
+.sdk-new-game-btn:hover {
+    background-color: #2b6cb0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(49, 130, 206, 0.5);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 480px) {
+    .sdk-game {
+        padding: 16px;
+    }
+
+    .sdk-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .sdk-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sdk-col {
+        font-size: 1rem;
+    }
+
+    .sdk-notes {
+        font-size: 0.5rem;
+    }
+
+    .sudoku-title {
+        font-size: 1.75rem;
+    }
+}
+
+/* Additional animations for enhanced interactivity */
+.sdk-correct {
+    animation: correctAnimation 0.5s ease-out;
+}
+
+@keyframes correctAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Confetti animation for game completion */
+.sdk-completion-overlay:before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(
+            to right,
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff
+    );
+    animation: confetti 2s linear infinite;
+}
+
+@keyframes confetti {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(600px);
+    }
+}
+
+/* Focus styles for accessibility */
+.sdk-num-btn:focus,
+.sdk-hint-btn:focus,
+.sdk-restart-btn:focus,
+.sdk-theme-btn:focus,
+.sdk-pause-btn:focus,
+.sdk-level-btn:focus,
+.sdk-new-game-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+/* Custom scrollbar */
+.sudoku-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sudoku-container::-webkit-scrollbar-track {
+    background: #f7fafc;
+}
+
+.sudoku-container::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 4px;
+}
+
+.sdk-dark-theme::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.sdk-dark-theme::-webkit-scrollbar-thumb {
+    background-color: #4a5568;
+}
